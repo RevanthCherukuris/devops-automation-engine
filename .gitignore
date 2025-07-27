@@ -1,14 +1,22 @@
-# Node
-node_modules/
+# Terraform
+*.tfstate
+*.tfstate.*
+.crash
+.terraform/
+.terraform.lock.hcl
+terraform.tfvars
 
-# Python
-__pycache__/
-*.pyc
-
-# Java
-*.class
-build/
-
-# General
+# Local .env files
 .env
+.env.*
+
+# IDE/editor junk
+.vscode/
+.idea/
+*.swp
+
+# Mac & Linux
 .DS_Store
+
+# Logs
+*.log

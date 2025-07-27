@@ -1,10 +1,37 @@
-AWSTemplateFormatVersion: "2010-09-09"
-Description: Sample VPC CloudFormation
+AWSTemplateFormatVersion: '2010-09-09'
+Description: VPC Stack for Landing Zone
+
+Parameters:
+  VpcCidr:
+    Type: String
+    Default: 10.0.0.0/16
+    Description: CIDR block for VPC
+
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - test
+      - prod
+    Description: Environment tag for resources
+
 Resources:
   VPC:
     Type: AWS::EC2::VPC
     Properties:
-      CidrBlock: !Ref VpcCIDR
+      CidrBlock: !Ref VpcCidr
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
       Tags:
         - Key: Name
-          Value: SampleVPC
+          Value: !Sub "${Environment}-vpc"
+        - Key: Environment
+          Value: !Ref Environment
+
+Outputs:
+  VpcId:
+    Description: VPC ID
+    Value: !Ref VPC
+    Export:
+      Name: !Sub "${Environment}-VpcId"
