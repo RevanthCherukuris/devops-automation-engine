@@ -1,0 +1,14 @@
+# Node
+node_modules/
+
+# Python
+__pycache__/
+*.pyc
+
+# Java
+*.class
+build/
+
+# General
+.env
+.DS_Store

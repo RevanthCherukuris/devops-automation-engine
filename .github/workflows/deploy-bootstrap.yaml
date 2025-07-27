@@ -1,0 +1,31 @@
+name: Deploy Bootstrap CloudFormation Stack
+
+on:
+  workflow_dispatch:  # allows manual triggering
+
+jobs:
+  deploy-bootstrap:
+    name: Deploy Bootstrap Stack to AWS
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write   # required for OIDC
+      contents: read    # required to fetch repo content
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::186582696292:role/GitHubActionsOIDCRole
+          aws-region: us-east-1
+
+      - name: Deploy CloudFormation Stack
+        run: |
+          aws cloudformation deploy \
+            --template-file infra/bootstrap/lz-bootstrap.yaml \
+            --stack-name lz-bootstrap-stack \
+            --parameter-overrides BucketName=devops-lz-bootstrap-$(date +%s) \
+            --capabilities CAPABILITY_NAMED_IAM
