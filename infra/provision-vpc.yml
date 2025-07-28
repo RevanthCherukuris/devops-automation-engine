@@ -1,8 +1,0 @@
-name: Provision VPC Infra
-on: [workflow_dispatch]
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Placeholder
-      run: echo "Provision VPC Infra"

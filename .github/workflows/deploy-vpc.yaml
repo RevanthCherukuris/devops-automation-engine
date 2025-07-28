@@ -1,7 +1,7 @@
 name: Deploy VPC
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: # Manual trigger
 
 jobs:
   deploy-vpc:
@@ -11,18 +11,51 @@ jobs:
       contents: read
 
     steps:
-      - name: Checkout Repo
+      # Step 1: Checkout Repo
+      - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Configure AWS Credentials (OIDC)
+      # Step 2: Configure AWS OIDC Credentials
+      - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: arn:aws:iam::186582696292:role/GitHubActionsOIDCRole
           aws-region: us-east-1
 
+      # Step 3: Debug Paths
+      - name: Debug Directory Structure
+        run: |
+          echo "Current Working Directory:"
+          pwd
+          echo "Repo Contents:"
+          ls -R
+
+      # Step 4: Validate VPC Template
+      - name: Validate CloudFormation Template
+        run: |
+          if [ -f infra/networking/vpc-stack.yaml ]; then
+            echo "Validating Template..."
+            aws cloudformation validate-template \
+              --template-body file://infra/networking/vpc-stack.yaml
+          else
+            echo "❌ ERROR: VPC template file not found at infra/networking/vpc-stack.yaml"
+            exit 1
+          fi
+
+      # Step 5: Deploy VPC Stack
       - name: Deploy VPC Stack
         run: |
+          echo "Deploying VPC Stack..."
           aws cloudformation deploy \
             --template-file infra/networking/vpc-stack.yaml \
             --stack-name lz-vpc-stack \
-            --capabilities CAPABILITY_NAMED_IAM
+            --capabilities CAPABILITY_NAMED_IAM \
+            --parameter-overrides VpcCIDR=10.0.0.0/16
+          echo "✅ VPC Deployment Completed"
+
+      # Step 6: Verify Stack Status
+      - name: Verify Stack Status
+        run: |
+          echo "Checking stack status..."
+          aws cloudformation describe-stacks --stack-name lz-vpc-stack \
+            --query "Stacks[0].StackStatus" --output text
