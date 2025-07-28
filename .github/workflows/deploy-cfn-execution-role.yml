@@ -1,0 +1,28 @@
+name: Deploy CloudFormation Execution Role
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-execution-role:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write    # OIDC for AWS
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::186582696292:role/GitHubActionsOIDCRole
+          aws-region: us-east-1
+
+      - name: Deploy CloudFormation Execution Role
+        run: |
+          aws cloudformation deploy \
+            --template-file infra/iam/cloudformation-execution-role.yaml \
+            --stack-name cloudformation-execution-role-stack \
+            --capabilities CAPABILITY_NAMED_IAM
