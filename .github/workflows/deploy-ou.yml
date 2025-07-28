@@ -20,11 +20,11 @@ jobs:
           role-to-assume: arn:aws:iam::186582696292:role/GitHubActionsOIDCRole
           aws-region: us-east-1
      
-     - name: Deploy Organizational Units Stack
-       run: |
-         aws cloudformation deploy \
-           --stack-name lz-organizational-units \
-           --template-file infra/organizations/organizational-units.yaml \
-           --capabilities CAPABILITY_NAMED_IAM \
-           --role-arn aarn:aws:iam::186582696292:role/CloudFormationExecutionRole \
-           --parameter-overrides RootOrgId=$ROOT_ID
+      - name: Deploy Organizational Units Stack
+        run: |
+          aws cloudformation deploy \
+            --stack-name lz-organizational-units \
+            --template-file infra/organizations/organizational-units.yaml \
+            --capabilities CAPABILITY_NAMED_IAM \
+            --role-arn aarn:aws:iam::186582696292:role/CloudFormationExecutionRole \
+            --parameter-overrides RootOrgId=$ROOT_ID
