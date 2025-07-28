@@ -24,7 +24,7 @@ jobs:
        run: |
          aws cloudformation deploy \
            --stack-name lz-organizational-units \
-           --template-file infra/organizations/ou.yaml \
+           --template-file infra/organizations/organizational-units.yaml \
            --capabilities CAPABILITY_NAMED_IAM \
-           --role-arn arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/CloudFormationExecutionRole \
+           --role-arn aarn:aws:iam::186582696292:role/CloudFormationExecutionRole \
            --parameter-overrides RootOrgId=$ROOT_ID
