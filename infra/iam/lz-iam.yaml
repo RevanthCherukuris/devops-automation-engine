@@ -1,0 +1,40 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: IAM roles for AWS Landing Zone Bootstrap
+
+Resources:
+  OrgAdminRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: LZ-OrgAdmin
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: arn:aws:iam::186582696292:root
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AdministratorAccess
+
+  AuditRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: LZ-Audit
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: arn:aws:iam::186582696292:root
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/SecurityAudit
+
+Outputs:
+  OrgAdminRoleArn:
+    Description: ARN of Org Admin Role
+    Value: !GetAtt OrgAdminRole.Arn
+
+  AuditRoleArn:
+    Description: ARN of Audit Role
+    Value: !GetAtt AuditRole.Arn

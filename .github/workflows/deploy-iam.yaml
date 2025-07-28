@@ -1,0 +1,29 @@
+name: Deploy IAM Roles
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-iam:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::186582696292:role/GitHubActionsOIDCRole
+          aws-region: us-east-1
+
+      - name: Deploy IAM Stack
+        run: |
+          aws cloudformation deploy \
+            --stack-name lz-iam-stack \
+            --template-file infra/iam/lz-iam.yaml \
+            --parameter-overrides file://infra/iam/parameters.json \
+            --capabilities CAPABILITY_NAMED_IAM

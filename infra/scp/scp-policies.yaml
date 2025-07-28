@@ -1,0 +1,37 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: SCP Policies for AWS Landing Zone
+
+Resources:
+  DenyRootPolicy:
+    Type: AWS::Organizations::Policy
+    Properties:
+      Content:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: DenyRootUser
+            Effect: Deny
+            Action: "*"
+            Resource: "*"
+            Condition:
+              StringLike:
+                aws:PrincipalArn: "arn:aws:iam::*:root"
+      Name: DenyRootUserPolicy
+      Type: SERVICE_CONTROL_POLICY
+
+  DenyNonApprovedRegions:
+    Type: AWS::Organizations::Policy
+    Properties:
+      Content:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: DenyRegions
+            Effect: Deny
+            Action: "*"
+            Resource: "*"
+            Condition:
+              StringNotEquals:
+                aws:RequestedRegion:
+                  - "us-east-1"
+                  - "us-west-2"
+      Name: DenyNonApprovedRegions
+      Type: SERVICE_CONTROL_POLICY
