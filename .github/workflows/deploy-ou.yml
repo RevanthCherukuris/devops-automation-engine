@@ -19,11 +19,25 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::186582696292:role/GitHubActionsOIDCRole
           aws-region: us-east-1
-     
+
+      - name: Get Root Org ID
+        id: get-org-id
+        run: |
+          ORG_ID=$(aws organizations describe-organization --query "Organization.Id" --output text)
+          echo "ORG_ID=$ORG_ID" >> $GITHUB_ENV
+
       - name: Deploy OU Stack
         run: |
-          aws cloudformation deploy \
-            --template-file infra/organizations/organizational-units.yaml \
-            --stack-name lz-ou-stack \
-            --capabilities CAPABILITY_NAMED_IAM
-      
+          if [ -f "infra/organizations/parameters.json" ]; then
+            PARAMS=$(jq -r '.[] | "\(.ParameterKey)=\(.ParameterValue)"' infra/organizations/parameters.json)
+            aws cloudformation deploy \
+              --template-file infra/organizations/organizational-units.yaml \
+              --stack-name lz-ou-stack \
+              --capabilities CAPABILITY_NAMED_IAM \
+              --parameter-overrides $PARAMS
+          else
+            aws cloudformation deploy \
+              --template-file infra/organizations/organizational-units.yaml \
+              --stack-name lz-ou-stack \
+              --capabilities CAPABILITY_NAMED_IAM \
+              --parameter-overrides RootOrgId="${{ env.ORG_ID }}"
