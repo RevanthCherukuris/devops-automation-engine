@@ -23,8 +23,7 @@ jobs:
       - name: Deploy OU Stack
         run: |
           aws cloudformation deploy \
-            --stack-name lz-organizational-units \
             --template-file infra/organizations/organizational-units.yaml \
-            --capabilities CAPABILITY_NAMED_IAM \
-            --parameter-overrides RootOrgId=r-labq
+            --stack-name lz-ou-stack \
+            --capabilities CAPABILITY_NAMED_IAM
       
