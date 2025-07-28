@@ -26,5 +26,5 @@ jobs:
             --stack-name lz-organizational-units \
             --template-file infra/organizations/organizational-units.yaml \
             --capabilities CAPABILITY_NAMED_IAM \
-            --parameter-overrides RootOrgId=$ROOT_ID
+            --parameter-overrides RootOrgId=r-labq
       
