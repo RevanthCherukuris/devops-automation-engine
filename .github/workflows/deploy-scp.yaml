@@ -23,7 +23,7 @@ jobs:
       - name: Deploy SCP Stack
         run: |
           aws cloudformation deploy \
+            --template-file infra/scp/lz-scp.yaml \
             --stack-name lz-scp-stack \
-            --template-file infra/scp/scp-policies.yaml \
-            --parameter-overrides file://infra/scp/parameters.json \
-            --capabilities CAPABILITY_NAMED_IAM
+            --capabilities CAPABILITY_NAMED_IAM \
+            --role-arn arn:aws:iam::186582696292:role/CloudFormationExecutionRole
