@@ -1,0 +1,49 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: AWS Organizations - Organizational Units Setup
+
+Resources:
+  SecurityOU:
+    Type: AWS::Organizations::OrganizationalUnit
+    Properties:
+      Name: Security
+      ParentId: !Ref RootOrgId
+
+  InfrastructureOU:
+    Type: AWS::Organizations::OrganizationalUnit
+    Properties:
+      Name: Infrastructure
+      ParentId: !Ref RootOrgId
+
+  WorkloadsOU:
+    Type: AWS::Organizations::OrganizationalUnit
+    Properties:
+      Name: Workloads
+      ParentId: !Ref RootOrgId
+
+  SandboxOU:
+    Type: AWS::Organizations::OrganizationalUnit
+    Properties:
+      Name: Sandbox
+      ParentId: !Ref RootOrgId
+
+Parameters:
+  RootOrgId:
+    Type: String
+    Description: The Root ID of the AWS Organization (use `aws organizations list-roots` to get this)
+
+Outputs:
+  SecurityOUId:
+    Description: Security OU ID
+    Value: !Ref SecurityOU
+
+  InfrastructureOUId:
+    Description: Infrastructure OU ID
+    Value: !Ref InfrastructureOU
+
+  WorkloadsOUId:
+    Description: Workloads OU ID
+    Value: !Ref WorkloadsOU
+
+  SandboxOUId:
+    Description: Sandbox OU ID
+    Value: !Ref SandboxOU

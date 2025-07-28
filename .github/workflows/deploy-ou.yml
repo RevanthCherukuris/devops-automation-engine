@@ -1,0 +1,30 @@
+name: Deploy Organizational Units
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-ou:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::<MANAGEMENT_ACCOUNT_ID>:role/GitHubActionsOIDCRole
+          aws-region: us-east-1
+
+      - name: Deploy Organizational Units
+        run: |
+          ROOT_ID=$(aws organizations list-roots --query "Roots[0].Id" --output text)
+          aws cloudformation deploy \
+            --stack-name lz-organizational-units \
+            --template-file infra/organizations/organizational-units.yaml \
+            --parameter-overrides RootOrgId=$ROOT_ID \
+            --capabilities CAPABILITY_NAMED_IAM
