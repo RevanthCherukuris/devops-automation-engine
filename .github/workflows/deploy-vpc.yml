@@ -1,0 +1,51 @@
+name: Deploy VPC
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-vpc:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::186582696292:role/GitHubActionsOIDCRole
+          aws-region: us-east-1
+
+      - name: Verify AWS Access
+        run: aws sts get-caller-identity
+
+      - name: Validate Template
+        run: aws cloudformation validate-template --template-body file://infra/networking/vpc-stack.yaml
+
+      - name: Check Stack State
+        id: check-stack
+        run: |
+          set +e
+          STATE=$(aws cloudformation describe-stacks --stack-name lz-vpc-stack --query "Stacks[0].StackStatus" --output text 2>/dev/null)
+          echo "STATE=$STATE" >> $GITHUB_ENV
+          set -e
+
+      - name: Delete Failed Stack if Exists
+        if: env.STATE == 'ROLLBACK_COMPLETE' || env.STATE == 'CREATE_FAILED'
+        run: |
+          echo "Deleting failed stack..."
+          aws cloudformation delete-stack --stack-name lz-vpc-stack
+          aws cloudformation wait stack-delete-complete --stack-name lz-vpc-stack
+
+      - name: Deploy VPC Stack
+        run: |
+          set -e
+          aws cloudformation deploy \
+            --template-file infra/networking/vpc-stack.yaml \
+            --stack-name lz-vpc-stack \
+            --capabilities CAPABILITY_NAMED_IAM \
+            --parameter-overrides VpcCIDR=10.0.0.0/16
