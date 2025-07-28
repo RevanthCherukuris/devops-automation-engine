@@ -41,3 +41,4 @@ jobs:
               --stack-name lz-ou-stack \
               --capabilities CAPABILITY_NAMED_IAM \
               --parameter-overrides RootOrgId="${{ env.ORG_ID }}"
+          fi   # ✅ PROPERLY CLOSED IF BLOCK
