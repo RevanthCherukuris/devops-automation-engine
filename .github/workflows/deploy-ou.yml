@@ -28,3 +28,4 @@ jobs:
             --template-file infra/organizations/organizational-units.yaml \
             --parameter-overrides RootOrgId=$ROOT_ID \
             --capabilities CAPABILITY_NAMED_IAM
+            --role-arn arn:aws:iam::186582696292:role/CloudFormationExecutionRole
