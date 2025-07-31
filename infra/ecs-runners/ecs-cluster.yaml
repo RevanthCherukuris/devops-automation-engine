@@ -1,0 +1,30 @@
+name: Deploy ECS GitHub Runners
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-ecs:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::<ACCOUNT_ID>:role/GitHubActionsOIDCRole
+          aws-region: us-east-1
+
+      - name: Deploy ECS Cluster & Infra
+        run: |
+          PARAMS=$(jq -r '.[] | "\(.ParameterKey)=\(.ParameterValue)"' infra/ecs-runners/parameters.json)
+          aws cloudformation deploy \
+            --template-file infra/ecs-runners/ecs-cluster.yaml \
+            --stack-name ci-cd-ecs-infra \
+            --capabilities CAPABILITY_NAMED_IAM \
+            --parameter-overrides $PARAMS

@@ -1,0 +1,44 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: ECS Task Definition for GitHub Runners
+
+Parameters:
+  ClusterName:
+    Type: String
+  SubnetIds:
+    Type: CommaDelimitedList
+  SecurityGroupId:
+    Type: String
+
+Resources:
+  RunnerTaskDef:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: github-runner-task
+      Cpu: '1024'
+      Memory: '2048'
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      ExecutionRoleArn: arn:aws:iam::${AWS::AccountId}:role/ecsTaskExecutionRole
+      ContainerDefinitions:
+        - Name: github-runner
+          Image: <ECR_IMAGE_URI>
+          Essential: true
+          Environment:
+            - Name: GITHUB_REPO
+              Value: "RevanthCherukuris/devops-automation-engine"
+            - Name: RUNNER_LABELS
+              Value: "ecs-runner,python-ci"
+  RunnerService:
+    Type: AWS::ECS::Service
+    Properties:
+      Cluster: !Ref ClusterName
+      TaskDefinition: !Ref RunnerTaskDef
+      LaunchType: FARGATE
+      DesiredCount: 1
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          SecurityGroups:
+            - !Ref SecurityGroupId
+          Subnets: !Ref SubnetIds

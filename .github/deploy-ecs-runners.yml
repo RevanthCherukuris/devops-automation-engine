@@ -1,0 +1,41 @@
+name: Deploy ECS GitHub Runners
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-ecs:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::186582696292:role/GitHubActionsOIDCRole
+          aws-region: us-east-1
+
+      - name: Deploy ECS Cluster
+        run: |
+          PARAMS=$(jq -r '.[] | "\(.ParameterKey)=\(.ParameterValue)"' infra/ecs-runners/parameters.json)
+          aws cloudformation deploy \
+            --template-file infra/ecs-runners/ecs-cluster.yaml \
+            --stack-name ecs-cluster-stack \
+            --capabilities CAPABILITY_NAMED_IAM \
+            --parameter-overrides $PARAMS
+
+      - name: Deploy ECS Task & Service (GitHub Runner)
+        run: |
+          CLUSTER=$(aws cloudformation describe-stacks --stack-name ecs-cluster-stack --query "Stacks[0].Outputs[?OutputKey=='ClusterName'].OutputValue" --output text)
+          SG=$(aws cloudformation describe-stacks --stack-name ecs-cluster-stack --query "Stacks[0].Outputs[?OutputKey=='RunnerSG'].OutputValue" --output text)
+
+          aws cloudformation deploy \
+            --template-file infra/ecs-runners/ecs-task.yaml \
+            --stack-name ecs-runner-task-stack \
+            --capabilities CAPABILITY_NAMED_IAM \
+            --parameter-overrides ClusterName=$CLUSTER SubnetIds=$(jq -r '.[] | select(.ParameterKey=="SubnetIds") | .ParameterValue' infra/ecs-runners/parameters.json) SecurityGroupId=$SG

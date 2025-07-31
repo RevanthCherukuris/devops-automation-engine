@@ -1,0 +1,46 @@
+name: Central Python CI/CD
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+
+jobs:
+  pre-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run Linting (flake8)
+        run: pip install flake8 && flake8 .
+
+      - name: Run SAST (Bandit)
+        run: pip install bandit && bandit -r .
+
+      - name: Dependency Scan (pip-audit)
+        run: pip install pip-audit && pip-audit
+
+      - name: Secrets Scan (Gitleaks)
+        uses: zricethezav/gitleaks-action@v2
+
+  build-test:
+    runs-on: ubuntu-latest
+    needs: pre-checks
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+      - name: Run Unit Tests (Pytest)
+        run: pytest --junitxml=results.xml
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-test
+    steps:
+      - name: Deploy to AWS Lambda (example)
+        run: echo "Deploying app to environment: ${{ inputs.environment }}"

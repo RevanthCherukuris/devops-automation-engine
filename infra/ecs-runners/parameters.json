@@ -1,0 +1,10 @@
+[
+  {
+    "ParameterKey": "VpcId",
+    "ParameterValue": "vpc-0fb386add3a7cbe82"
+  },
+  {
+    "ParameterKey": "SubnetIds",
+    "ParameterValue": "subnet-02642b8d3ace681f6,subnet-095b43d67a0aeb4cf"
+  }
+]
